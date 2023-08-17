@@ -689,9 +689,62 @@ export PERACT_ROOT=$(pwd)  # mostly used as a reference point for tutorials # /h
 python setup.py develop
 ```
 
-### 3.下载checkpoint
+### 3.下载PerAct checkpoint
 ```bash
 cd $PERACT_ROOT # /home/kb/MyProjects/peract/
 sh scripts/quickstart_download.sh  # 这个文件是我们修改过的
 ```
 
+## 测试
+### 1.generate a small evaluation dataset
+有18个任务可供选择：
+```bash
+open_drawer
+slide_block_to_color_target
+sweep_to_dustpan_of_size
+meat_off_grill
+turn_tap
+put_item_in_drawer
+close_jar
+reach_and_drag
+stack_blocks
+light_bulb_in
+put_money_in_safe
+place_wine_at_rack_location
+put_groceries_in_cupboard
+place_shape_in_shape_sorter
+push_buttons
+insert_onto_square_peg
+stack_cups
+place_cups
+```
+以下命令会在`peract/data/val/`下新建一个`open_drawer`，并在其中生成不同视角不同位置的任务进行中的图片。
+```bash
+cd <install_dir>/RLBench/tools
+python dataset_generator.py --tasks=sweep_to_dustpan_of_size \
+                            --save_path=$PERACT_ROOT/data/val \
+                            --image_size=128,128 \
+                            --renderer=opengl \
+                            --episodes_per_task=10 \
+                            --processes=1 \
+                            --all_variations=True
+```
+### 2.evaluating a pre-trained multi-task agent
+会启动软件，并在软件中执行机器人操作。如果上面没有生成数据集，这一步是不会有操作执行的。
+```bash
+cd $PERACT_ROOT  # 即/peract/文件夹
+CUDA_VISIBLE_DEVICES=0 python eval.py \
+    rlbench.tasks=[open_drawer] \
+    rlbench.task_name='multi' \
+    rlbench.demo_path=$PERACT_ROOT/data/val \
+    framework.gpu=0 \
+    framework.logdir=$PERACT_ROOT/ckpts/ \
+    framework.start_seed=0 \
+    framework.eval_envs=1 \
+    framework.eval_from_eps_number=0 \
+    framework.eval_episodes=10 \
+    framework.csv_logging=True \
+    framework.tensorboard_logging=True \
+    framework.eval_type='last' \
+    rlbench.headless=False
+```
