@@ -91,7 +91,8 @@ git clone -b peract https://github.com/MohitShridhar/RLBench.git # note: 'peract
 
 cd RLBench
 pip install -r requirements.txt
-python setup.py develop
+pip install .
+# python setup.py develop
 ```
 
 For [running in headless mode](https://github.com/MohitShridhar/RLBench/tree/peract#running-headless), tasks setups, and other issues, please refer to the [official repo](https://github.com/stepjam/RLBench).
@@ -663,7 +664,8 @@ cd peract/thirdparty/
 git clone -b peract https://github.com/MohitShridhar/RLBench.git # note: 'peract' branch
 cd RLBench
 pip install -r requirements.txt
-python setup.py develop
+pip install .
+# python setup.py develop
 ```
 
 #### YARR
@@ -686,7 +688,8 @@ pip install ftfy regex tqdm
 ```bash
 cd peract/
 export PERACT_ROOT=$(pwd)  # mostly used as a reference point for tutorials # /home/kb/MyProjects/peract/
-python setup.py develop
+pip install .
+# python setup.py develop
 ```
 
 ### 3.下载PerAct checkpoint
