@@ -91,8 +91,8 @@ git clone -b peract https://github.com/MohitShridhar/RLBench.git # note: 'peract
 
 cd RLBench
 pip install -r requirements.txt
-pip install .
-# python setup.py develop
+# pip install .
+python setup.py develop
 ```
 
 For [running in headless mode](https://github.com/MohitShridhar/RLBench/tree/peract#running-headless), tasks setups, and other issues, please refer to the [official repo](https://github.com/stepjam/RLBench).
