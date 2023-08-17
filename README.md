@@ -664,8 +664,8 @@ cd peract/thirdparty/
 git clone -b peract https://github.com/MohitShridhar/RLBench.git # note: 'peract' branch
 cd RLBench
 pip install -r requirements.txt
-pip install .
-# python setup.py develop
+# pip install .
+python setup.py develop
 ```
 
 #### YARR
@@ -676,7 +676,7 @@ cd peract/thirdparty/
 git clone -b peract https://github.com/MohitShridhar/YARR.git # note: 'peract' branch
 cd YARR
 pip install -r requirements.txt
-pip install .  # 之前是python setup.py develop
+pip install .  # 之前是python setup.py develop,但是会报错
 ```
 PerAct Repo
 ```bash
@@ -688,8 +688,8 @@ pip install ftfy regex tqdm
 ```bash
 cd peract/
 export PERACT_ROOT=$(pwd)  # mostly used as a reference point for tutorials # /home/kb/MyProjects/peract/
-pip install .
-# python setup.py develop
+# pip install .
+python setup.py develop
 ```
 
 ### 3.下载PerAct checkpoint
