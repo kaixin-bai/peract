@@ -589,3 +589,109 @@ Thanks for open-sourcing!
 ## Questions or Issues?
 
 Please file an issue with the issue tracker.  
+
+# 笔记
+## 安装
+### 1.python环境
+```bash
+git clone https://github.com/kaixin-bai/peract.git
+cd peract/
+conda create -n peract python=3.8
+conda activate peract
+conda install pytorch==1.12.1 torchvision==0.13.1 cudatoolkit=11.3 -c pytorch
+```
+### 2.所有依赖项安装
+确认系统的ubuntu版本：
+```bash
+$ lsb_release -a
+    No LSB modules are available.                                                                                                                                                                                      
+    Distributor ID: Ubuntu                                                                                                                                                                                             
+    Description:    Ubuntu 18.04.6 LTS                                                                                                                                                                                 
+    Release:        18.04                                                                                                                                                                                              
+    Codename:       bionic  
+```
+
+#### CoppeliaSim
+根据确定的ubuntu版本下载和安装[version 4.1 of CoppeliaSim](https://www.coppeliarobotics.com/files/CoppeliaSim_Edu_V4_1_0_Ubuntu18_04.tar.xz)  \
+在项目中新建文件夹`thirdparty`，将下载的`CoppeliaSim`解压在此文件夹内.
+```bash
+cd peract/thirdparty/
+wget --no-check-certificate https://www.coppeliarobotics.com/files/CoppeliaSim_Edu_V4_1_0_Ubuntu18_04.tar.xz
+tar -xvf CoppeliaSim_Edu_V4_1_0_Ubuntu18_04.tar.xz -C ./
+rm CoppeliaSim_Edu_V4_1_0_Ubuntu18_04.tar.xz
+```
+
+#### PyRep
+下载`PyRep`:
+```bash
+cd peract/thirdparty/
+git clone https://github.com/stepjam/PyRep.git
+cd PyRep
+```
+在`~/.bashrc`中添加以下内容：
+```bash
+# 更换此处路径为coppeliasim的路径
+# 在gpu01上是`/home/kb/MyProjects/peract/thirdparty/CoppeliaSim_Edu_V4_1_0_Ubuntu18_04/`
+# 在本机上是`/home/kb/AgileProjects/peract/thirdparty/CoppeliaSim_Edu_V4_1_0_Ubuntu18_04`
+export COPPELIASIM_ROOT=<EDIT ME>/PATH/TO/COPPELIASIM/INSTALL/DIR  
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$COPPELIASIM_ROOT
+export QT_QPA_PLATFORM_PLUGIN_PATH=$COPPELIASIM_ROOT
+```
+```bash
+source ~/.bashrc
+conda activate peract
+```
+安装剩下的python依赖项：
+```bash
+cd PyRep
+pip3 install absl-py==0.15.0 einops==0.3.2 ftfy gdown==3.13.1 hydra-core==1.0.5 matplotlib numpy==1.21 packaging==21.3 pandas==1.4.1 pyrender==0.1.45 pytorch3d==0.3.0 regex scipy==1.4.1 tensorboard transformers==4.3.2 trimesh==3.9.34
+pip install .
+```
+
+#### peract
+安装`peract`：
+```bash
+cd peract
+pip3 install .  # setup.py是被修改过的！取消了去安装requirements.txt里面的依赖项
+```
+
+#### RLBench
+安装RLBench：  \
+这个requirements里面没有什么特别的，可以直接安装。
+```bash
+cd peract/thirdparty/
+git clone -b peract https://github.com/MohitShridhar/RLBench.git # note: 'peract' branch
+cd RLBench
+pip install -r requirements.txt
+python setup.py develop
+```
+
+#### YARR
+安装YARR：  \
+这个requirements里面没有什么特别的，可以直接安装。
+```bash
+cd peract/thirdparty/
+git clone -b peract https://github.com/MohitShridhar/YARR.git # note: 'peract' branch
+cd YARR
+pip install -r requirements.txt
+pip install .  # 之前是python setup.py develop
+```
+PerAct Repo
+```bash
+cd peract/thirdparty/
+pip install git+https://github.com/openai/CLIP.git
+# pip install -r requirements.txt  不要安装
+pip install ftfy regex tqdm
+```
+```bash
+cd peract/
+export PERACT_ROOT=$(pwd)  # mostly used as a reference point for tutorials # /home/kb/MyProjects/peract/
+python setup.py develop
+```
+
+### 3.下载checkpoint
+```bash
+cd $PERACT_ROOT # /home/kb/MyProjects/peract/
+sh scripts/quickstart_download.sh  # 这个文件是我们修改过的
+```
+
