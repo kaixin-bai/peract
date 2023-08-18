@@ -638,6 +638,11 @@ export COPPELIASIM_ROOT=<EDIT ME>/PATH/TO/COPPELIASIM/INSTALL/DIR
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$COPPELIASIM_ROOT
 export QT_QPA_PLATFORM_PLUGIN_PATH=$COPPELIASIM_ROOT
 export PERACT_ROOT=/home/kb/gpu02kb/peract  # 这个一定要加上，因为后面训练要这个环境变量！
+
+# 以下为与显示相关的环境变量，请只添加在服务器上！本地请不要添加！
+export DISPLAY=:0
+export MESA_GL_VERSION_OVERRIDE=4.1
+export PYOPENGL_PLATFORM=egl
 ```
 ```bash
 source ~/.bashrc
@@ -881,4 +886,76 @@ CUDA_VISIBLE_DEVICES=0 python train.py \
     ddp.num_devices=8
 ```
 
-# TODO:代码精度
+---
+# 所遇到的问题整理
+1.在服务器上训练时报错：
+```bash
+INFO:root:Loading Demo(91) - found 6 keypoints - close_jar
+INFO:root:Loading Demo(92) - found 6 keypoints - close_jar
+INFO:root:Loading Demo(93) - found 6 keypoints - close_jar
+INFO:root:Loading Demo(94) - found 6 keypoints - close_jar
+INFO:root:Loading Demo(95) - found 6 keypoints - close_jar
+INFO:root:Loading Demo(96) - found 6 keypoints - close_jar
+INFO:root:Loading Demo(97) - found 6 keypoints - close_jar
+INFO:root:Loading Demo(98) - found 6 keypoints - close_jar
+INFO:root:Loading Demo(99) - found 6 keypoints - close_jar
+INFO:root:# Q Params: 33240669
+/home/kb/MyProjects/peract/agents/peract_bc/qattention_peract_bc_agent.py:52: UserWarning: __floordiv__ is deprecated, and its behavior will change in a future version of pytorch. It currently rounds toward 0 (like the 'trunc' function NOT 'floor'). This results in incorrect rounding for negative values. To keep the current behavior, use torch.div(a, b, rounding_mode='trunc'), or for actual floor division, use torch.div(a, b, rounding_mode='floor').
+  indices = torch.cat([((idxs // h) // d), (idxs // h) % w, idxs % w], 1)
+INFO:torch.nn.parallel.distributed:Reducer buckets have been rebuilt in this iteration.
+Traceback (most recent call last):
+  File "train.py", line 79, in main
+    mp.spawn(run_seed_fn.run_seed,
+  File "/home/kb/anaconda3/envs/peract/lib/python3.8/site-packages/torch/multiprocessing/spawn.py", line 240, in spawn
+    return start_processes(fn, args, nprocs, join, daemon, start_method='spawn')
+  File "/home/kb/anaconda3/envs/peract/lib/python3.8/site-packages/torch/multiprocessing/spawn.py", line 198, in start_processes
+    while not context.join():
+  File "/home/kb/anaconda3/envs/peract/lib/python3.8/site-packages/torch/multiprocessing/spawn.py", line 160, in join
+    raise ProcessRaisedException(msg, error_index, failed_process.pid)
+torch.multiprocessing.spawn.ProcessRaisedException: 
+
+-- Process 0 terminated with the following error:
+Traceback (most recent call last):
+  File "/home/kb/anaconda3/envs/peract/lib/python3.8/site-packages/torch/multiprocessing/spawn.py", line 69, in _wrap
+    fn(i, *args)
+  File "/home/kb/MyProjects/peract/run_seed_fn.py", line 158, in run_seed
+    train_runner.start()
+  File "/home/kb/anaconda3/envs/peract/lib/python3.8/site-packages/yarr/runners/offline_train_runner.py", line 145, in start
+    agent_summaries = self._agent.update_summaries()
+  File "/home/kb/MyProjects/peract/helpers/preprocess_agent.py", line 80, in update_summaries
+    sums.extend(self._pose_agent.update_summaries())
+  File "/home/kb/MyProjects/peract/agents/peract_bc/qattention_stack_agent.py", line 98, in update_summaries
+    summaries.extend(qa.update_summaries())
+  File "/home/kb/MyProjects/peract/agents/peract_bc/qattention_peract_bc_agent.py", line 617, in update_summaries
+    transforms.ToTensor()(visualise_voxel(
+  File "/home/kb/MyProjects/peract/helpers/utils.py", line 234, in visualise_voxel
+    r = offscreen_renderer or pyrender.OffscreenRenderer(
+  File "/home/kb/anaconda3/envs/peract/lib/python3.8/site-packages/pyrender/offscreen.py", line 31, in __init__
+    self._create()
+  File "/home/kb/anaconda3/envs/peract/lib/python3.8/site-packages/pyrender/offscreen.py", line 149, in _create
+    self._platform.init_context()
+  File "/home/kb/anaconda3/envs/peract/lib/python3.8/site-packages/pyrender/platforms/pyglet_platform.py", line 50, in init_context
+    self._window = pyglet.window.Window(config=conf, visible=False,
+  File "/home/kb/anaconda3/envs/peract/lib/python3.8/site-packages/pyglet/window/xlib/__init__.py", line 133, in __init__
+    super(XlibWindow, self).__init__(*args, **kwargs)
+  File "/home/kb/anaconda3/envs/peract/lib/python3.8/site-packages/pyglet/window/__init__.py", line 513, in __init__
+    display = pyglet.canvas.get_display()
+  File "/home/kb/anaconda3/envs/peract/lib/python3.8/site-packages/pyglet/canvas/__init__.py", line 59, in get_display
+    return Display()
+  File "/home/kb/anaconda3/envs/peract/lib/python3.8/site-packages/pyglet/canvas/xlib.py", line 88, in __init__
+    raise NoSuchDisplayException(f'Cannot connect to "{name}"')
+pyglet.canvas.xlib.NoSuchDisplayException: Cannot connect to "None"
+
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+```
+分析：在报错中看到如下信息，是由于pyglet尝试连接到一个`X server`，但是失败了，pyglet和pyrender一起用来进行离屏渲染，这是因为我们用的是headless环境进行的训练。
+```bash
+pyglet.canvas.xlib.NoSuchDisplayException: Cannot connect to "None"
+```
+解决：在原始repo中提到在这种情况下修改与显示相关的环境变量如下：
+```bash
+export DISPLAY=:0
+export MESA_GL_VERSION_OVERRIDE=4.1
+export PYOPENGL_PLATFORM=egl
+```
