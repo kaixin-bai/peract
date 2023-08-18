@@ -637,7 +637,7 @@ cd PyRep
 export COPPELIASIM_ROOT=<EDIT ME>/PATH/TO/COPPELIASIM/INSTALL/DIR  
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$COPPELIASIM_ROOT
 export QT_QPA_PLATFORM_PLUGIN_PATH=$COPPELIASIM_ROOT
-export PERACT_ROOT=/home/kb/gpu02kb/peract
+export PERACT_ROOT=/home/kb/gpu02kb/peract  # 这个一定要加上，因为后面训练要这个环境变量！
 ```
 ```bash
 source ~/.bashrc
@@ -700,6 +700,12 @@ sh scripts/quickstart_download.sh  # 这个文件是我们修改过的
 ```
 
 ## 测试
+注意：因为我们要同时在本地和服务器上运行，所以我修改了软链接的部分！  \
+在本地或者服务器运行时，无论是训练还是测试，请先运行如下命令：
+```bash
+创建指向服务器路径的软链接：sh setup_soft_link.sh --server
+创建指向本地路径的软链接：sh setup_soft_link.sh --local
+```
 ### 1.generate a small evaluation dataset
 有18个任务可供选择：
 ```bash
@@ -751,4 +757,28 @@ CUDA_VISIBLE_DEVICES=0 python eval.py \
     framework.tensorboard_logging=True \
     framework.eval_type='last' \
     rlbench.headless=False
+```
+
+## 训练准备
+注意：因为我们要同时在本地和服务器上运行，所以我修改了软链接的部分！  \
+在本地或者服务器运行时，无论是训练还是测试，请先运行如下命令：
+```bash
+创建指向服务器路径的软链接：sh setup_soft_link.sh --server
+创建指向本地路径的软链接：sh setup_soft_link.sh --local
+```
+### 训练集的下载
+```bash
+# 所有内容所在文件夹
+https://drive.google.com/drive/folders/0B2LlLwoO3nfZfkFqMEhXWkxBdjJNNndGYl9uUDQwS1pfNkNHSzFDNGwzd1NnTmlpZXR1bVE?resourcekey=0-jRw5RaXEYRLe2W6aNrNFEQ
+# train文件夹
+https://drive.google.com/drive/folders/0B2LlLwoO3nfZfi1LbGJINXJ1TUQxN1pxa3Q1MzlDZmY0WGk1RmhxazZvNFEydUREbXM4cTA?resourcekey=0-DpkG5eIqkwjKJ84qFcaUfw&usp=drive_link
+# test文件夹
+https://drive.google.com/drive/folders/0B2LlLwoO3nfZfnJnSmNHTXZycUtFN0k3Y3o2SjlvWUg1WHRkU1Y2OE1wdkN6V1BkRGF6MG8?resourcekey=0-4V4AQmv6RCytSv0_ua2HKg&usp=drive_link
+# val文件夹
+https://drive.google.com/drive/folders/0B2LlLwoO3nfZfjZVeEkydnAxZWhfTlp4RG9icHQwa3lqVFdlNXoyNExRUnpwOGtqRmY0aEE?resourcekey=0-7XAtiOBiw9bMclxyOqUeXA&usp=drive_link
+```
+将下载好的内容放置于以下文件夹中：
+```bash
+- /data/
+  - /data/train/
 ```
