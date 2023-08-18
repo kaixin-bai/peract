@@ -633,10 +633,11 @@ cd PyRep
 ```bash
 # 更换此处路径为coppeliasim的路径
 # 在gpu01上是`/home/kb/MyProjects/peract/thirdparty/CoppeliaSim_Edu_V4_1_0_Ubuntu18_04/`
-# 在本机上是`/home/kb/AgileProjects/peract/thirdparty/CoppeliaSim_Edu_V4_1_0_Ubuntu18_04`
+# 在本机上是`/home/kb/gpu02kb/peract/thirdparty/CoppeliaSim_Edu_V4_1_0_Ubuntu18_04`
 export COPPELIASIM_ROOT=<EDIT ME>/PATH/TO/COPPELIASIM/INSTALL/DIR  
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$COPPELIASIM_ROOT
 export QT_QPA_PLATFORM_PLUGIN_PATH=$COPPELIASIM_ROOT
+export PERACT_ROOT=/home/kb/gpu02kb/peract
 ```
 ```bash
 source ~/.bashrc
