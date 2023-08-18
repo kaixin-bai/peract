@@ -782,3 +782,103 @@ https://drive.google.com/drive/folders/0B2LlLwoO3nfZfjZVeEkydnAxZWhfTlp4RG9icHQw
 - /data/
   - /data/train/
 ```
+选择你要训练的数据集，在文件夹内进行解压，比如：
+```bash
+cd peract/data/train/
+unzip close_jar-003.zip
+```
+#### 训练集内容解析
+以`close_jar`为例，数据集的结构如下：     \
+```bash
+- close_jar
+  - all_variations
+    - episodes
+      - episode0  -- episode99
+```
+在`episode`文件夹中：  \
+在0文件夹中，是给红色瓶子拧瓶盖，在1文件夹中，是给绿色瓶子拧瓶盖。
+```bash
+- episode0
+  - front_rgb/           : 均是0.png到172.png (128, 128, 3), 0-255的三通道图片
+  - front_depth/         : 深度图很奇怪，虽然也是三通到的，但是看起来就像电脑花屏了一样，TODO:这个有什么说法吗？
+  - front_mask/          : mask也是三通道，mask都在第一个通道，后面两个通道都是0
+
+  - left_shoulder_rgb/  
+  - left_shoulder_depth/
+  - left_shoulder_mask/   
+  
+  - overhead_rgb/  
+  - overhead_depth/    
+  - overhead_mask/
+  
+  - right_shoulder_rgb/
+  - right_shoulder_depth/
+  - right_shoulder_mask/
+  
+  - wrist_rgb/ 
+  - wrist_depth/    
+  - wrist_mask/
+
+  - variation_descriptions.pkl
+  - low_dim_obs.pkl    
+  - variation_number.pkl
+```
+- 在`variation_descriptions.pkl`中的内容是：
+```bash
+['close the red jar',
+ 'screw on the red jar lid',
+ 'grasping the lid, lift it from the table and use it to seal the red jar',
+ 'pick up the lid from the table and put it on the red jar']
+```
+- 在`variation_number.pkl`中的内容是：
+```bash
+0
+```
+- 在`low_dim_obs.pkl`中的内容是：
+```bash
+In [1]: import pickle
+
+In [2]: pkl_file_path = "low_dim_obs.pkl"
+
+In [3]: # Load and print the content
+   ...: with open(pkl_file_path, 'rb') as file:
+   ...:     data = pickle.load(file)
+   ...:     print(data)
+   ...: 
+<rlbench.demo.Demo object at 0x7f7041064790>
+
+In [4]: print(dir(data))
+['__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__len__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_observations', 'random_seed', 'restore_state', 'variation_number']
+```
+
+### 训练
+```bash
+CUDA_VISIBLE_DEVICES=0 python train.py \
+    method=PERACT_BC \
+    rlbench.tasks=[close_jar] \
+    rlbench.task_name='multi_18T' \
+    rlbench.cameras=[front,left_shoulder,right_shoulder,wrist] \
+    rlbench.demos=100 \
+    rlbench.demo_path=$PERACT_ROOT/data/train \
+    replay.batch_size=1 \
+    replay.path=/tmp/replay \
+    replay.max_parallel_processes=32 \
+    method.voxel_sizes=[100] \
+    method.voxel_patch_size=5 \
+    method.voxel_patch_stride=5 \
+    method.num_latents=2048 \
+    method.transform_augmentation.apply_se3=True \
+    method.transform_augmentation.aug_rpy=[0.0,0.0,45.0] \
+    method.pos_encoding_with_lang=True \
+    framework.training_iterations=600000 \
+    framework.num_weights_to_keep=60 \
+    framework.start_seed=0 \
+    framework.log_freq=1000 \
+    framework.save_freq=10000 \
+    framework.logdir=$PERACT_ROOT/logs/ \
+    framework.csv_logging=True \
+    framework.tensorboard_logging=True \
+    ddp.num_devices=8
+```
+
+# TODO:代码精度
